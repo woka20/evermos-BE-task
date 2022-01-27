@@ -6,8 +6,7 @@ import (
 
 type Order struct {
 	gorm.Model
-	OrderID int `json:"order_id`
-	BuyerID int `json:"buyer_id`
-	Qty     int `json:"qty" validate: min=0`
-	StoreID int `json:"store_id"`
+	BuyerID  int `json:"buyer_id"`
+	Quantity int `json:"quantity"`
+	StoreID  int `json:"store_id"`
 }

@@ -6,6 +6,5 @@ import (
 
 type Buyer struct {
 	gorm.Model
-	BuyerID int    `json:"buyer_id`
-	Name    string `json:"name`
+	Name string `json:"name`
 }
