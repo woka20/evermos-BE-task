@@ -17,7 +17,7 @@ This is the solution to **Question 1 of Evermos Backend Engineer Task
 
 1. Clone this repository.
 2. Go to `task-store` folder.
-3. Configure your database and run the migrations in `migrations` folder and     run `go run main.go migrate`
+3. Configure your database in line with `.env` file and run the migrations in `migrations` folder and     run `go run main.go migrate`
 4. `go run main.go`
 
 
