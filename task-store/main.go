@@ -13,9 +13,9 @@ import (
 
 func main() {
 	config.ConfigInit()
-
+	var newHandler handler.OrderHandlerInterface
 	apps := gin.Default()
-	newHandler := handler.NewOrderHandler()
+	newHandler = handler.NewOrderHandler()
 
 	cmdString := command()
 	fmt.Println("command " + cmdString)

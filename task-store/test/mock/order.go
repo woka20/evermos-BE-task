@@ -3,7 +3,6 @@ package mock
 import (
 	"evermos-be-task/task-store/request"
 	response "evermos-be-task/task-store/responses"
-	"fmt"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,7 +34,7 @@ func (m *MockOrder) CreateOrderAndOrderDetail(req request.OrderRequest) (resp re
 	ret := m.ctrl.Call(m, "CreateOrderAndOrderDetail", req)
 	ret0, _ := ret[0].(response.OrderResponse)
 	ret1, _ := ret[1].(error)
-	fmt.Println(ret0)
+
 	return ret0, ret1
 }
 
