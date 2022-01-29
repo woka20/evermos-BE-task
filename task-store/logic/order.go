@@ -6,7 +6,9 @@ import (
 	"evermos-be-task/task-store/model"
 	"evermos-be-task/task-store/request"
 	response "evermos-be-task/task-store/responses"
+	"fmt"
 	"log"
+	"sync"
 )
 
 type OrderLogicInterface interface {
@@ -17,6 +19,7 @@ type OrderLogic struct {
 	OrderRepo       databases.OrderRepoInterface
 	OrderDetailRepo databases.OrderDetailRepoInterface
 	ProductRepo     databases.ProductRepoInterface
+	mux             sync.Mutex
 }
 
 func NewOrderLogic() OrderLogicInterface {
@@ -29,10 +32,14 @@ func NewOrderLogic() OrderLogicInterface {
 }
 
 func (o *OrderLogic) CreateOrderAndOrderDetail(req request.OrderRequest) (resp response.OrderResponse, err error) {
+	o.mux.Lock()
+	defer o.mux.Unlock()
 
+	var order_detail_id uint
 	storeIds := make(map[int]int)
 	var products []model.Product
 	for _, val := range req.Products {
+
 		res, err := o.ProductRepo.GetProduct(val)
 
 		if err != nil {
@@ -60,18 +67,19 @@ func (o *OrderLogic) CreateOrderAndOrderDetail(req request.OrderRequest) (resp r
 	orders := model.Order{
 		BuyerID:  req.BuyerID,
 		Quantity: countAll(req.Products),
-		StoreID:  mapForProduct[0].StoreID,
+		StoreID:  mapForProduct[1].StoreID,
 	}
 
-	o.OrderRepo.AddOrder(orders)
+	g, _ := o.OrderRepo.AddOrder(orders)
 
 	for _, val := range req.Products {
+		fmt.Println(g)
 		orderDetails := model.OrderDetail{
-			OrderID:   int(orders.ID),
+			OrderID:   int(g),
 			ProductID: int(val.ProductID),
 			Qty:       val.Quantity,
 		}
-		o.OrderDetailRepo.AddOrderDetail(orderDetails)
+		order_detail_id, _ = o.OrderDetailRepo.AddOrderDetail(orderDetails)
 		orderDetailList = append(orderDetailList, orderDetails)
 		productUpdate := mapForProduct[int(val.ProductID)]
 		productUpdate.Stock = productUpdate.Stock - orderDetails.Qty
@@ -81,19 +89,19 @@ func (o *OrderLogic) CreateOrderAndOrderDetail(req request.OrderRequest) (resp r
 
 	}
 
-	result := makingOrderResponse(orders, orderDetailList, mapForProduct)
+	result := makingOrderResponse(orders, orderDetailList, mapForProduct, g, order_detail_id)
 
 	return result, nil
 
 }
 
-func makingOrderResponse(order model.Order, orderDetail []model.OrderDetail, maps map[int]model.Product) (resp response.OrderResponse) {
+func makingOrderResponse(order model.Order, orderDetail []model.OrderDetail, maps map[int]model.Product, order_id uint, order_detail_id uint) (resp response.OrderResponse) {
 
 	var orderDetailRespList []response.OrderDetailResponse
 
 	for _, val := range orderDetail {
 		orderDetailResp := response.OrderDetailResponse{
-			OrderDetailID: int(val.ID),
+			OrderDetailID: int(order_detail_id),
 			ProductID:     val.ProductID,
 			ProductName:   maps[val.ProductID].ProductName,
 			Quantity:      val.Qty,
@@ -102,7 +110,7 @@ func makingOrderResponse(order model.Order, orderDetail []model.OrderDetail, map
 	}
 
 	orderFinal := response.OrderResponse{
-		OrderID:      int(order.ID),
+		OrderID:      int(order_id),
 		OrderDetails: orderDetailRespList,
 	}
 

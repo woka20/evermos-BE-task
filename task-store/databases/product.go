@@ -6,6 +6,7 @@ import (
 	"evermos-be-task/task-store/model"
 	"evermos-be-task/task-store/request"
 	response "evermos-be-task/task-store/responses"
+	"fmt"
 )
 
 type ProductRepoInterface interface {
@@ -31,15 +32,21 @@ func (p *ProductRepo) AddProduct(prods model.Product) (err error) {
 }
 
 func (p *ProductRepo) GetProduct(req request.ProductRequest) (prods model.Product, err error) {
+
 	var product model.Product
+
 	tx := database.DB.Begin()
+
 	defer func() {
 		if r := recover(); r != nil {
 			tx.RollbackUnlessCommitted()
 		}
 	}()
-	tx.Where("id = ? and stock >= ?", req.ProductID, req.Quantity).Find(&product)
 
+	if err := tx.Where("id = ? and stock >= ?", req.ProductID, req.Quantity).Find(&product).Error; err != nil {
+		return prods, err
+	}
+	fmt.Println("777")
 	if req.ProductID != 0 && req.ProductID == product.ID {
 		return product, nil
 	} else {

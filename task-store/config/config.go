@@ -25,7 +25,7 @@ func ConfigInit() {
 	PORT = os.Getenv("PORT")
 	DB_NAME = os.Getenv("DB_NAME")
 	DB_PORT = os.Getenv("DB_PORT")
-	DB_PASS = os.Getenv("DB_PASS")
+	DB_PASS = os.Getenv("DB_PASSWORD")
 	DB_UNAME = os.Getenv("DB_USERNAME")
 	DB_HOST = os.Getenv("DB_HOST")
 

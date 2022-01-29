@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+
 	"github.com/jinzhu/gorm"
 	migrate "github.com/rubenv/sql-migrate"
 )

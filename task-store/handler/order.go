@@ -5,13 +5,15 @@ import (
 	"evermos-be-task/task-store/logic"
 	"evermos-be-task/task-store/request"
 	response "evermos-be-task/task-store/responses"
+	"io/ioutil"
 	"log"
 
-	"github.com/kataras/iris/v12"
+	// "github.com/kataras/iris/v12"
+	"github.com/gin-gonic/gin"
 )
 
 type OrderHandlerInterface interface {
-	GenerateOrder(ctx iris.Context)
+	GenerateOrder(ctx *gin.Context)
 }
 
 type OrderHandler struct {
@@ -25,15 +27,19 @@ func NewOrderHandler() OrderHandlerInterface {
 
 }
 
-func (o *OrderHandler) GenerateOrder(ctx iris.Context) {
-	body, err := ctx.GetBody()
+func (o *OrderHandler) GenerateOrder(ctx *gin.Context) {
+	body, err := ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
 		log.Println(err)
-		ctx.StatusCode(500)
-		ctx.JSON(response.BadResp{
+		ctx.Status(500)
+		ctx.JSON(500, response.BadResp{
 			Status:  500,
 			Message: "Error reading request body information",
 		})
+		// ctx.JSON(response.BadResp{
+		// 	Status:  500,
+		// 	Message: "Error reading request body information",
+		// })
 		return
 	}
 
@@ -41,17 +47,18 @@ func (o *OrderHandler) GenerateOrder(ctx iris.Context) {
 
 	if err := json.Unmarshal(body, &order); err != nil {
 		log.Println(err)
-		ctx.StatusCode(500)
-		ctx.JSON(response.BadResp{
+		ctx.Status(500)
+		ctx.JSON(500, response.BadResp{
 			Status:  500,
-			Message: "Error Umarshal request body information",
+			Message: "Error unmarshal",
 		})
+
 		return
 	}
 
 	OrderResp, err := o.OrderLogic.CreateOrderAndOrderDetail(order)
 	if err != nil {
-		ctx.JSON(response.BadResp{
+		ctx.JSON(500, response.BadResp{
 			Status:  500,
 			Message: err.Error(),
 		})
@@ -59,7 +66,7 @@ func (o *OrderHandler) GenerateOrder(ctx iris.Context) {
 		return
 	}
 
-	ctx.JSON(response.SuccessResp{
+	ctx.JSON(200, response.SuccessResp{
 		Status: 200,
 		Data:   OrderResp,
 	})

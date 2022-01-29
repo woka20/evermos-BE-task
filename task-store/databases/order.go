@@ -7,7 +7,7 @@ import (
 
 type OrderRepoInterface interface {
 	// GetOrderList() (prods []response.OrderResponse, err error)
-	AddOrder(ord model.Order) (err error)
+	AddOrder(ord model.Order) (in uint, err error)
 }
 
 type OrderRepo struct {
@@ -18,7 +18,7 @@ func NewOrderRepo() OrderRepoInterface {
 
 }
 
-func (p *OrderRepo) AddOrder(ord model.Order) (err error) {
+func (p *OrderRepo) AddOrder(ord model.Order) (in uint, err error) {
 	tx := database.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -33,9 +33,12 @@ func (p *OrderRepo) AddOrder(ord model.Order) (err error) {
 	}
 
 	tx.Create(&orders)
+	// 	tx.Rollback()
+	// 	return err
+	// }
 
 	tx.Commit()
-	return
+	return orders.ID, nil
 }
 
 // func (p *OrderRepo) GetOrderList() (prods []response.OrderResponse, err error) {

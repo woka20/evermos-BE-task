@@ -7,7 +7,7 @@ import (
 
 type OrderDetailRepoInterface interface {
 	// GetOrderList() (prods []response.OrderResponse, err error)
-	AddOrderDetail(ods model.OrderDetail) (err error)
+	AddOrderDetail(ods model.OrderDetail) (in uint, err error)
 }
 
 type OrderDetailRepo struct {
@@ -18,7 +18,7 @@ func NewOrderDetailRepo() OrderDetailRepoInterface {
 
 }
 
-func (p *OrderDetailRepo) AddOrderDetail(ods model.OrderDetail) (err error) {
+func (p *OrderDetailRepo) AddOrderDetail(ods model.OrderDetail) (in uint, err error) {
 	tx := database.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -33,9 +33,9 @@ func (p *OrderDetailRepo) AddOrderDetail(ods model.OrderDetail) (err error) {
 	}
 	if err := tx.Create(&orderDetails).Error; err != nil {
 		tx.Rollback()
-		return err
+		return in, err
 	}
 
 	tx.Commit()
-	return
+	return orderDetails.ID, nil
 }
